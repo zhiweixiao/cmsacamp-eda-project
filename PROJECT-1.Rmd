@@ -1,0 +1,29 @@
+---
+title: "PROJECT-1"
+author: "zhiwei xiao"
+date: "6/5/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+mlb = read.csv("http://www.stat.cmu.edu/cmsac/sure/materials/data/eda_projects/top_hitters_2019_batted_balls.csv")
+
+```
+
+```{r}
+library(tidyverse)
+dim(mlb)
+colnames(mlb)
+table(mlb$pitch_type)
+table(mlb$outcome)
+```
+
+```{r}
+mlb %>% group_by(player, outcome) %>% summarize(count = n ()) %>%
+  pivot_wider(names_from = outcome, values_from = count)
+```
+
