@@ -11,7 +11,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 mlb = read.csv("http://www.stat.cmu.edu/cmsac/sure/materials/data/eda_projects/top_hitters_2019_batted_balls.csv")
-
 ```
 
 ```{r}
@@ -22,10 +21,11 @@ colnames(mlb)
 table(mlb$pitch_type)
 table(mlb$outcome)
 table(mlb$batter_stand)
+ggplot(na.omit(mlb)) + geom_point(aes(x = hit_x, y = hit_y, color = player), size = 0.4) + geom_smooth(aes(x = hit_x, y = hit_y)) + facet_wrap(vars(outcome))
 ```
 
 ```{r}
 mlb %>% group_by(player, outcome) %>% summarize(count = n ()) %>%
-  pivot_wider(names_from = outcome, values_from = count) 
+  pivot_wider(names_from = outcome, values_from = count) %>% arrange(desc(home_run))
 ```
 
