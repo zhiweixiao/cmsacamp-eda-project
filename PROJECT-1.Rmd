@@ -16,14 +16,16 @@ mlb = read.csv("http://www.stat.cmu.edu/cmsac/sure/materials/data/eda_projects/t
 
 ```{r}
 library(tidyverse)
+library(gt)
 dim(mlb)
 colnames(mlb)
 table(mlb$pitch_type)
 table(mlb$outcome)
+table(mlb$batter_stand)
 ```
 
 ```{r}
 mlb %>% group_by(player, outcome) %>% summarize(count = n ()) %>%
-  pivot_wider(names_from = outcome, values_from = count)
+  pivot_wider(names_from = outcome, values_from = count) 
 ```
 
