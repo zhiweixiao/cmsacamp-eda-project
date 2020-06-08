@@ -21,11 +21,45 @@ colnames(mlb)
 table(mlb$pitch_type)
 table(mlb$outcome)
 table(mlb$batter_stand)
-ggplot(na.omit(mlb)) + geom_point(aes(x = hit_x, y = hit_y, color = player), size = 0.4) + geom_smooth(aes(x = hit_x, y = hit_y)) + facet_wrap(vars(outcome))
+ggplot(na.omit(mlb)) + geom_point(aes(x = hit_x, y = hit_y, color = player), size = 0.4) + geom_smooth(aes(x = hit_x, y = hit_y)) + facet_wrap(vars(outcome)) + theme_bw()
 ```
 
 ```{r}
 mlb %>% group_by(player, outcome) %>% summarize(count = n ()) %>%
   pivot_wider(names_from = outcome, values_from = count) %>% arrange(desc(home_run))
+```
+
+```{r}
+na.omit(mlb) %>% filter(outcome == "single") %>% mutate(hit_x = hit_x/8, hit_y = hit_y/8) %>%
+  ggplot(aes(x = hit_x, y = hit_y)) + 
+  stat_density2d(h = 0.5, bins = 20,
+                 aes(fill = after_stat(level)),
+                 geom = "polygon") +
+  scale_fill_gradient(low = "darkblue",
+                      high = "darkorange") + 
+  theme_bw() + theme(legend.position = "bottom") +
+  coord_fixed()
+```
+
+
+
+
+
+```{r}
+ggplot(na.omit(mlb)) + geom_point(aes(x = hit_x, y = hit_y, color = outcome)) + 
+  theme_bw() + labs(title = "Hit_X vs. Hit_Y",
+       subtitle = "coloring based on outcome")
+```
+
+```{r}
+hc.complete = hclust(dist(na.omit(select(mlb, hit_x, hit_y,exit_velocity,launch_angle,hit_distance
+                                         ))) , method = "complete")
+c4.average = cutree(hc.complete, 4)
+
+ggplot(na.omit(mlb)) + geom_point(aes(x = hit_x, y = hit_y, color = factor(c4.average))) + 
+  theme_bw() + labs(color="cluster group", title = "Hit Coordinates Graph",
+       subtitle = "based on hierarchical clustering of 4 centers", 
+       x = "X Coordinate of Hit", y = "Y Coordinate of Hit")
+ 
 ```
 
