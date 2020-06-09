@@ -15,7 +15,9 @@ mlb = read.csv("http://www.stat.cmu.edu/cmsac/sure/materials/data/eda_projects/t
 
 ```{r}
 library(tidyverse)
+library(ggthemes)
 library(gt)
+
 dim(mlb)
 colnames(mlb)
 table(mlb$pitch_type)
@@ -30,15 +32,16 @@ mlb %>% group_by(player, outcome) %>% summarize(count = n ()) %>%
 ```
 
 ```{r}
-na.omit(mlb) %>% filter(outcome == "single") %>% mutate(hit_x = hit_x/8, hit_y = hit_y/8) %>%
+## heatmap of hit_x vs hit_y
+na.omit(mlb) %>% filter(outcome == "single") %>% mutate(hit_x = hit_x/7.5, hit_y = hit_y/7.5) %>%
   ggplot(aes(x = hit_x, y = hit_y)) + 
   stat_density2d(h = 0.5, bins = 20,
                  aes(fill = after_stat(level)),
                  geom = "polygon") +
   scale_fill_gradient(low = "darkblue",
                       high = "darkorange") + 
-  theme_bw() + theme(legend.position = "bottom") +
-  coord_fixed()
+  theme_bw() + theme(legend.position = "bottom")+
+ coord_fixed() + scale_x_continuous(limits = c(-12,12)) + scale_y_continuous(limits = c(-1,20))
 ```
 
 
@@ -54,12 +57,27 @@ ggplot(na.omit(mlb)) + geom_point(aes(x = hit_x, y = hit_y, color = outcome)) +
 ```{r}
 hc.complete = hclust(dist(na.omit(select(mlb, hit_x, hit_y,exit_velocity,launch_angle,hit_distance
                                          ))) , method = "complete")
-c4.average = cutree(hc.complete, 4)
+# plot(hc.complete)
 
-ggplot(na.omit(mlb)) + geom_point(aes(x = hit_x, y = hit_y, color = factor(c4.average))) + 
+c4.complete = cutree(hc.complete, 4)
+
+ggplot(na.omit(mlb)) + geom_point(aes(x = hit_x, y = hit_y, color = factor(c4.complete))) + 
   theme_bw() + labs(color="cluster group", title = "Hit Coordinates Graph",
        subtitle = "based on hierarchical clustering of 4 centers", 
-       x = "X Coordinate of Hit", y = "Y Coordinate of Hit")
+       x = "X Coordinate of Hit", y = "Y Coordinate of Hit") + ggthemes::scale_color_colorblind()
  
+```
+```{r}
+library(protoclust)
+mlb_minimax = protoclust(dist(na.omit(select(mlb, hit_x,   
+                                             hit_y,exit_velocity,launch_angle,hit_distance))))
+#plot(mlb_minimax)
+
+minimax_mlb_clusters = protocut(mlb_minimax, k = 3)
+
+ggplot(na.omit(mlb)) + geom_point(aes(x = hit_x, y = hit_y, color = factor(minimax_mlb_clusters$cl)))+ theme_bw() + labs(color="cluster group", title = "Hit Coordinates Graph",
+       subtitle = "based on minimax clustering of 4 centers", 
+       x = "X Coordinate of Hit", y = "Y Coordinate of Hit") + ggthemes::scale_color_colorblind()
+
 ```
 
